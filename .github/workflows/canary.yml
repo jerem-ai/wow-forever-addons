@@ -1,0 +1,35 @@
+name: CurseForge canary
+
+# Every day, check that each addon in addons.json still resolves to a WoW Forever file on
+# CurseForge that downloads and unzips. A failed run emails the repo owner.
+on:
+  schedule:
+    - cron: '17 15 * * *'
+  push:
+    paths: ['addons.json', 'sync.py', '.github/workflows/canary.yml']
+  workflow_dispatch:
+    inputs:
+      extra_ids:
+        description: Extra CurseForge project IDs to check, space separated (a bad one should fail the run)
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check every addon
+        env:
+          EXTRA_IDS: ${{ inputs.extra_ids }}
+        run: python3 sync.py --check --addons addons.json --extra-ids $EXTRA_IDS
+      # GitHub pauses scheduled workflows after 60 days without repo activity; re-enabling resets that.
+      - name: Keep the daily schedule alive
+        if: github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/canary.yml/enable"
