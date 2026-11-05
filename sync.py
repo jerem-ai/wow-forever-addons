@@ -12,6 +12,7 @@ Exit codes: 0 all good, 1 something failed, 2 WoW Forever not found.
 """
 import argparse
 import datetime
+import fcntl
 import glob
 import json
 import os
@@ -173,6 +174,9 @@ def sync(args):
         return 0
 
     addons_dir.mkdir(parents=True, exist_ok=True)
+    if DATA.is_dir():  # one sync at a time; a second run waits, then finds everything current
+        lock = open(DATA / "sync.lock", "w")
+        fcntl.flock(lock, fcntl.LOCK_EX)
     state_path = DATA / "state.json"
     state = read_json(state_path, {})
     failed = 0

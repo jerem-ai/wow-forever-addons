@@ -79,6 +79,9 @@ def main():
     if found.returncode == 2:
         return 2
 
+    print("First sync:", flush=True)
+    code = subprocess.run([sys.executable, str(sync)]).returncode
+
     if shutil.which("systemctl") and systemctl("is-system-running").stdout.strip():
         UNITS.mkdir(parents=True, exist_ok=True)
         (UNITS / f"{NAME}.service").write_text(SERVICE.format(python=sys.executable, sync=sync))
@@ -86,14 +89,13 @@ def main():
         systemctl("daemon-reload")
         enabled = systemctl("enable", "--now", f"{NAME}.timer")
         if enabled.returncode == 0:
-            print("Daily sync on: systemd user timer wow-forever-addons.timer")
+            print("Daily sync on: systemd user timer wow-forever-addons.timer", flush=True)
         else:
-            print(f"Could not turn on the daily sync: {enabled.stderr.strip()}")
+            print(f"Could not turn on the daily sync: {enabled.stderr.strip()}", flush=True)
     else:
-        print("No systemd user session here, so no daily sync. Rerun this installer to update.")
+        print("No systemd user session here, so no daily sync. Rerun this installer to update.", flush=True)
 
-    print("First sync:")
-    return subprocess.run([sys.executable, str(sync)]).returncode
+    return code
 
 
 if __name__ == "__main__":
