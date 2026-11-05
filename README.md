@@ -28,7 +28,7 @@ curl -fsSL https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/in
 
 ## The addons
 
-The list lives in [`addons.json`](addons.json). Right now: Road To Sixty, QuestTogether, EasyMarksForever, Lore Forever, GearQuest Forever, DungeonJournal, Forever Quest Tint, What's Training?, Threat Plates, Auctionator, DBM (core and dungeons) and X-Perl UnitFrames. Each one downloads straight from CurseForge, the Forever build only.
+The list lives in [`addons.json`](addons.json). Right now: Road To Sixty, QuestTogether, EasyMarksForever, Lore Forever, GearQuest Forever, DungeonJournal, Forever Quest Tint, What's Training?, Threat Plates, Auctionator, DBM (core and dungeons), X-Perl UnitFrames, Questie, Details!, Leatrix Plus, Baganator and Does It Die. Each one downloads straight from CurseForge, the Forever build only.
 
 ## What it puts on your PC
 
