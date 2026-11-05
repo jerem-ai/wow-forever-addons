@@ -18,11 +18,12 @@ function Install-WowForeverAddons([string]$WowRoot, [switch]$WithWowUp, [switch]
     $data = Join-Path $env:LOCALAPPDATA 'wow-forever-addons'
     $sync = Join-Path $data 'sync.ps1'
     $taskName = 'WoW Forever addons sync'
-    $startup = Join-Path ([Environment]::GetFolderPath('Startup')) 'wow-forever-addons-sync.cmd'
+    $startup = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Startup\wow-forever-addons-sync.cmd'
     $runSync = "-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$sync`""
+    function Get-TaskFolder { $s = New-Object -ComObject Schedule.Service; $s.Connect(); $s.GetFolder('\') }
 
     if ($Uninstall) {
-        Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
+        try { (Get-TaskFolder).DeleteTask($taskName, 0) } catch { }
         Remove-Item -LiteralPath $startup -Force -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $data -Recurse -Force -ErrorAction SilentlyContinue
         Write-Host 'Removed the sync task and its files. Installed addons were left in place.'
@@ -41,23 +42,39 @@ function Install-WowForeverAddons([string]$WowRoot, [switch]$WithWowUp, [switch]
         return
     }
 
-    $me = "$env:USERDOMAIN\$env:USERNAME"
+    # Task Scheduler's COM API, not the ScheduledTasks cmdlets: those go through CIM, which
+    # refuses some non-admin sessions.
+    $me = [Security.SecurityElement]::Escape([Security.Principal.WindowsIdentity]::GetCurrent().Name)
+    $xml = @"
+<?xml version="1.0" encoding="UTF-16"?>
+<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <RegistrationInfo><Description>Keeps WoW Forever addons current: https://github.com/jerem-ai/wow-forever-addons</Description></RegistrationInfo>
+  <Triggers>
+    <LogonTrigger><Enabled>true</Enabled><UserId>$me</UserId><Delay>PT2M</Delay></LogonTrigger>
+    <CalendarTrigger><StartBoundary>2026-01-01T12:00:00</StartBoundary><Enabled>true</Enabled><ScheduleByDay><DaysInterval>1</DaysInterval></ScheduleByDay></CalendarTrigger>
+  </Triggers>
+  <Principals><Principal id="Author"><UserId>$me</UserId><LogonType>InteractiveToken</LogonType><RunLevel>LeastPrivilege</RunLevel></Principal></Principals>
+  <Settings>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <StartWhenAvailable>true</StartWhenAvailable>
+    <ExecutionTimeLimit>PT30M</ExecutionTimeLimit>
+  </Settings>
+  <Actions Context="Author"><Exec><Command>powershell.exe</Command><Arguments>$([Security.SecurityElement]::Escape($runSync))</Arguments></Exec></Actions>
+</Task>
+"@
     try {
-        $logon = New-ScheduledTaskTrigger -AtLogOn -User $me
-        $logon.Delay = 'PT2M'
-        $daily = New-ScheduledTaskTrigger -Daily -At '12:00'
-        Register-ScheduledTask -TaskName $taskName -Force `
-            -Action (New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $runSync) `
-            -Trigger $logon, $daily `
-            -Principal (New-ScheduledTaskPrincipal -UserId $me -LogonType Interactive -RunLevel Limited) `
-            -Settings (New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries `
-                -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Minutes 30)) | Out-Null
+        $folder = Get-TaskFolder
+        $null = $folder.RegisterTask($taskName, $xml, 6, $null, $null, 3)  # create or update; interactive token
+        $null = $folder.GetTask($taskName)
         Remove-Item -LiteralPath $startup -Force -ErrorAction SilentlyContinue
         Write-Host "Daily sync on: scheduled task '$taskName' (at logon and 12:00)"
     } catch {
-        # Some PCs refuse logon tasks without admin; the Startup folder still runs it at every logon.
+        # The Startup folder still runs the sync at every logon.
+        New-Item -ItemType Directory -Force -Path (Split-Path $startup) | Out-Null
         Set-Content -LiteralPath $startup -Encoding ASCII -Value "@start `"`" /min powershell.exe $runSync"
-        Write-Host "Sync on at every logon (Startup folder; the scheduled task was refused: $($_.Exception.Message))"
+        Write-Host "Sync on at every logon (Startup folder; the scheduled task was refused: $($_.Exception.Message.Trim()))"
     }
 
     if ($WithWowUp) {
