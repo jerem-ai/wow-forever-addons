@@ -28,7 +28,9 @@ curl -fsSL https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/in
 
 ## The addons
 
-The list lives in [`addons.json`](addons.json). Right now: Road To Sixty, QuestTogether, EasyMarksForever, Lore Forever, GearQuest Forever, DungeonJournal, Forever Quest Tint, What's Training?, Threat Plates, Auctionator, DBM (core and dungeons), X-Perl UnitFrames, Questie, Details!, Leatrix Plus, Baganator, Does It Die, SkillUp Forever, Shortest Path Forever, Books on Map Forever and Lore Forever's quest voices (male narrator and quest givers, about 716 MB, off until you turn on Speak quest dialogue in Lore Forever's Options). Each one downloads straight from CurseForge, the Forever build only.
+The list lives in [`addons.json`](addons.json). Right now: Road To Sixty, QuestTogether, EasyMarksForever, Lore Forever, GearQuest Forever, DungeonJournal, Forever Quest Tint, What's Training?, Threat Plates, Auctionator, DBM (core and dungeons), X-Perl UnitFrames, Questie with QuestieDB, Details!, Leatrix Plus, Baganator with Syndicator, Does It Die, SkillUp Forever, Shortest Path Forever, Books on Map Forever and Lore Forever's quest voices (male narrator and quest givers, about 716 MB, off until you turn on Speak quest dialogue in Lore Forever's Options). Each one downloads straight from CurseForge, the Forever build only.
+
+QuestieDB supplies Questie's quest data. Syndicator supplies Baganator's inventory data. Both are separate addons and must stay in the list, since our sync installs only the projects listed here.
 
 ## What it puts on your PC
 
