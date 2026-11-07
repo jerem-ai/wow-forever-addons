@@ -20,6 +20,17 @@
   ```
 - Healthy: all four sibling folders exist, Syndicator and QuestieDB declare interface `16001` for Forever, and the log reports each dependency installed or current. Quit WoW fully and relaunch after installing new folders, then check that bags open and Questie draws quest markers without a missing dependency warning.
 
+## High Fidelity World Map
+
+- Write site: the sync installs CurseForge project `1701034` from `addons.json` into `HighFidelityWorldMap` and records its file ID in `state.json`.
+- Observe on Linux:
+  ```sh
+  rg '^## (Interface|Version):' ~/WoW/_forever_/Interface/AddOns/HighFidelityWorldMap/HighFidelityWorldMap.toc
+  python3 -c 'import json,pathlib; print(json.loads((pathlib.Path.home()/".local/share/wow-forever-addons/state.json").read_text()).get("1701034"))'
+  tail -30 ~/.local/share/wow-forever-addons/sync.log
+  ```
+- Healthy: interface `16001`, an installed file ID in the sync state, and an `OK`, `UPDATED` or `CURRENT` log entry. After a full WoW restart, open the map with `M` and check the HD/SD toggle, quest markers and cave map. Files on disk alone do not verify the in-game view.
+
 ## CurseForge canary
 
 - Write site: `.github/workflows/canary.yml`, daily at 15:17 UTC and on every push to `addons.json` or `sync.py`.
