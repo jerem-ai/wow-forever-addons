@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Keep the group's WoW Forever addons installed and current on Linux (Steam Deck, Bazzite).
+"""Keep the group's WoW Forever addons installed and current on macOS and Linux.
 
 install.py saves this file to ~/.local/share/wow-forever-addons/ and a systemd user timer
 runs it at login and once a day. Each run reads addons.json from GitHub (the list only,
@@ -35,6 +35,8 @@ STEAM_ROOTS = [
     "~/.var/app/com.valvesoftware.Steam/.local/share/Steam",  # Flatpak Steam
 ]
 PATTERNS = [
+    "/Applications/World of Warcraft",
+    "~/Applications/World of Warcraft",
     f"/run/media/*/steamapps/compatdata/*/pfx/{WOW}",
     f"/run/media/*/*/steamapps/compatdata/*/pfx/{WOW}",
     f"~/Games/*/{WOW}",  # Lutris, native or Flatpak
@@ -76,11 +78,19 @@ def find_wow_root(explicit):
         candidates += glob.glob(os.path.join(glob.escape(lib), "steamapps/compatdata/*/pfx", WOW))
     for pattern in PATTERNS:
         candidates += glob.glob(os.path.expanduser(pattern))
-    found = [pathlib.Path(c) for c in candidates if c and (pathlib.Path(c) / "_forever_" / "Wow.exe").is_file()]
+    found = {}
+    for candidate in candidates:
+        if not candidate:
+            continue
+        root = pathlib.Path(candidate).expanduser()
+        for executable in ("Wow.exe", "World of Warcraft.app/Contents/MacOS/World of Warcraft"):
+            path = root / "_forever_" / executable
+            if path.is_file():
+                found[root] = max(found.get(root, 0), path.stat().st_mtime)
     if not found:
         return None
     # Several prefixes can hold a copy; use the one the game ran from most recently.
-    return max(found, key=lambda p: (p / "_forever_" / "Wow.exe").stat().st_mtime).resolve()
+    return max(found, key=found.get).resolve()
 
 
 def get(url):
@@ -165,7 +175,7 @@ def sync(args):
     config = read_json(DATA / "config.json", {})
     root = find_wow_root(args.wow_root or config.get("wow_root"))
     if not root:
-        say("WoW Forever not found (no _forever_/Wow.exe). Install it through Battle.net first, "
+        say("WoW Forever not found (no native Mac app or Wow.exe in _forever_). Install it through Battle.net first, "
             "or rerun the install with --wow-root.")
         return 2
     addons_dir = root / "_forever_" / "Interface" / "AddOns"

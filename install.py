@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install the WoW Forever addon sync on Linux (Steam Deck, Bazzite). No sudo needed.
+"""Install the WoW Forever addon sync on macOS or Linux. No sudo needed.
 
   curl -fsSL https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/install.py | python3 -
   ... | python3 - --wow-root "/path/to/World of Warcraft"
@@ -47,6 +47,8 @@ WantedBy=timers.target
 
 
 def systemctl(*args):
+    if not shutil.which("systemctl"):
+        return subprocess.CompletedProcess(args, 1, stdout="", stderr="systemctl is not installed")
     return subprocess.run(["systemctl", "--user", *args], capture_output=True, text=True)
 
 
@@ -56,7 +58,7 @@ def uninstall():
         (UNITS / unit).unlink(missing_ok=True)
     systemctl("daemon-reload")
     shutil.rmtree(DATA, ignore_errors=True)
-    print("Removed the sync timer and its files. Installed addons were left in place.")
+    print("Removed the sync files and any daily timer. Installed addons were left in place.")
     return 0
 
 
@@ -93,7 +95,7 @@ def main():
         else:
             print(f"Could not turn on the daily sync: {enabled.stderr.strip()}", flush=True)
     else:
-        print("No systemd user session here, so no daily sync. Rerun this installer to update.", flush=True)
+        print("Automatic updates aren't configured on this computer. Rerun the install command to update.", flush=True)
 
     return code
 

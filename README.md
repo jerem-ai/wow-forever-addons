@@ -1,6 +1,6 @@
 # WoW Forever addons
 
-Installs our group's WoW Forever addons and keeps them current. You run one line once. After that your PC checks for new and updated addons at every login and once a day.
+Installs our group's WoW Forever addons. Windows and Linux check for updates at login and daily. On Mac, rerun the install command to update.
 
 ## Install
 
@@ -10,11 +10,13 @@ Installs our group's WoW Forever addons and keeps them current. You run one line
 irm https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/install.ps1 | iex
 ```
 
-**Linux** (Steam Deck desktop mode, Bazzite, other distros). Open a terminal and paste:
+**Mac or Linux** (Steam Deck desktop mode, Bazzite, other distros). Quit WoW, open Terminal and paste:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/install.py | python3 -
 ```
+
+On Mac, this finds WoW in `/Applications/World of Warcraft` or `~/Applications/World of Warcraft`. It needs Python 3. Relaunch WoW through Battle.net after the install finishes.
 
 The last line tells you how it went. If it says WoW Forever wasn't found, point it at your World of Warcraft folder (the one that holds `_forever_`):
 
@@ -38,6 +40,7 @@ High Fidelity World Map adds an HD/SD button to the world map. Open the map with
 
 - Windows: `%LOCALAPPDATA%\wow-forever-addons\` (the sync script, its log and a record of what it installed) and a scheduled task named "WoW Forever addons sync".
 - Linux: `~/.local/share/wow-forever-addons/` and a systemd user timer named `wow-forever-addons.timer`.
+- Mac: `~/.local/share/wow-forever-addons/`. Rerun the install command to check for updates.
 
 Each sync reads the addon list from this repo. It never downloads new code. The script only changes when you run the install line again.
 
@@ -45,7 +48,7 @@ It adds and updates addons in `_forever_\Interface\AddOns`. It never deletes any
 
 ## Something wrong?
 
-Send the log: `%LOCALAPPDATA%\wow-forever-addons\sync.log` on Windows, `~/.local/share/wow-forever-addons/sync.log` on Linux.
+Send the log: `%LOCALAPPDATA%\wow-forever-addons\sync.log` on Windows, `~/.local/share/wow-forever-addons/sync.log` on Mac or Linux.
 
 ## Remove it
 
