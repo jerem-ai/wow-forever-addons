@@ -37,3 +37,14 @@
 - Observe: `gh run list -R jerem-ai/wow-forever-addons -w canary.yml -L 5`
 - Shape: one row per run with its status and trigger.
 - Healthy: the newest scheduled run is under 26 hours old and passed. A failed run means friends' syncs are failing the same way.
+
+## OpenMap
+
+- Write site: the existing sync installs CurseForge project `1735937` from `addons.json` into `OpenMap` and records its file ID in `state.json`.
+- Observe on Mac:
+  ```sh
+  rg '^## (Interface|Version):' "/Applications/World of Warcraft/_forever_/Interface/AddOns/OpenMap/OpenMap.toc"
+  python3 -c 'import json,pathlib; print(json.loads((pathlib.Path.home()/".local/share/wow-forever-addons/state.json").read_text()).get("1735937"))'
+  tail -30 ~/.local/share/wow-forever-addons/sync.log
+  ```
+- Healthy: interface `16001`, an installed file ID in the sync state, and an `OK`, `UPDATED` or `CURRENT` log entry. After a full WoW restart, `M` opens the continuous map, scroll and drag work, and Questie quest icons stay visible while zooming. Check High Fidelity's alternate-map overlay separately; source compatibility does not establish the live view.
