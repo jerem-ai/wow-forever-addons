@@ -48,3 +48,15 @@
   tail -30 ~/.local/share/wow-forever-addons/sync.log
   ```
 - Healthy: interface `16001`, an installed file ID in the sync state, and an `OK`, `UPDATED` or `CURRENT` log entry. After a full WoW restart, `M` opens the continuous map, scroll and drag work, and Questie quest icons stay visible while zooming. Check High Fidelity's alternate-map overlay separately; source compatibility does not establish the live view.
+
+## Scheduled Mac updates
+
+- Write site: `scheduled_mac.py` calls the installed `sync.py` for each due Tuesday/Friday 10 a.m. Pacific slot. The sync writes addon folders and updater state, with rollback copies under `~/.local/share/wow-forever-addons/backups/sync/`.
+- Observe:
+  ```sh
+  launchctl print gui/$(id -u)/com.jeremyshank.wow-forever-addons
+  cat ~/.local/share/wow-forever-addons/schedule-state.json
+  tail -40 ~/.local/share/wow-forever-addons/schedule.log
+  tail -40 ~/.local/share/wow-forever-addons/sync.log
+  ```
+- Healthy: the launch agent is loaded with a 900-second interval. The ledger records the most recent completed scheduled slot. The logs show `DONE` and sync exit 0, or `DEFERRED` while WoW is open. No network update runs between completed slots. A failed sync leaves the slot pending. Code on disk still needs an in-game check after restarting WoW.

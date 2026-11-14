@@ -50,7 +50,13 @@ EasyMarks Forever opens a marker wheel when needed. Select a mob and type `/emf`
 
 Each sync reads the addon list from this repo. It never downloads new code. The script only changes when you run the install line again.
 
-It adds and updates addons in `_forever_\Interface\AddOns`. It never deletes anything there, so an addon dropped from the list stays until you remove it yourself.
+### Scheduled Mac updates
+
+The optional Mac scheduler runs addon updates for Tuesday and Friday at 10 a.m. Pacific. A launch agent checks whether a run is due every 15 minutes and at login. Missed runs catch up when the Mac is awake and WoW is closed. A failed or deferred run stays pending.
+
+The scheduler uses `scheduled_mac.py` beside the installed `sync.py`, with launch agent `com.jeremyshank.wow-forever-addons`. It is configured separately from the normal Mac installer. The updater backs up changed addon folders, keeps the last three sync backups, preserves an existing Auctionator disenchant patch and keeps a newer installed ForeverCore when a bundle contains an older copy. It leaves WoW's saved UI settings alone.
+
+It adds and updates addons in `_forever_\Interface\AddOns`. Updates replace the managed addon folders and keep rollback copies. An addon dropped from the list stays installed until you remove it yourself.
 
 ## Something wrong?
 

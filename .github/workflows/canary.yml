@@ -6,7 +6,7 @@ on:
   schedule:
     - cron: '17 15 * * *'
   push:
-    paths: ['addons.json', 'sync.py', 'install.py', 'test_sync.py', '.github/workflows/canary.yml']
+    paths: ['addons.json', 'sync.py', 'scheduled_mac.py', 'install.py', 'test_sync.py', 'test_scheduled.py', '.github/workflows/canary.yml']
   workflow_dispatch:
     inputs:
       extra_ids:

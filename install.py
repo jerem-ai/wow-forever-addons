@@ -21,6 +21,7 @@ REPO = "https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main"
 DATA = pathlib.Path(os.environ.get("XDG_DATA_HOME", "~/.local/share")).expanduser() / "wow-forever-addons"
 UNITS = pathlib.Path(os.environ.get("XDG_CONFIG_HOME", "~/.config")).expanduser() / "systemd" / "user"
 NAME = "wow-forever-addons"
+MAC_AGENT = pathlib.Path.home() / "Library/LaunchAgents/com.jeremyshank.wow-forever-addons.plist"
 
 SERVICE = """[Unit]
 Description=Sync WoW Forever addons
@@ -53,6 +54,9 @@ def systemctl(*args):
 
 
 def uninstall():
+    if sys.platform == "darwin" and MAC_AGENT.exists():
+        subprocess.run(["/bin/launchctl", "bootout", f"gui/{os.getuid()}", str(MAC_AGENT)], capture_output=True)
+        MAC_AGENT.unlink()
     systemctl("disable", "--now", f"{NAME}.timer")
     for unit in (f"{NAME}.service", f"{NAME}.timer"):
         (UNITS / unit).unlink(missing_ok=True)

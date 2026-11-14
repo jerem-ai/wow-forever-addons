@@ -18,6 +18,9 @@ import json
 import os
 import pathlib
 import re
+import shutil
+import stat
+import subprocess
 import sys
 import tempfile
 import urllib.request
@@ -134,20 +137,105 @@ def pick_file(project_id):
     return None
 
 
+def archive_folders(z):
+    folders = set()
+    for m in z.infolist():
+        p = pathlib.PurePosixPath(m.filename)
+        if p.is_absolute() or ".." in p.parts or "\\" in m.filename or stat.S_ISLNK(m.external_attr >> 16):
+            raise ValueError(f"unsafe path in zip: {m.filename}")
+        if not m.is_dir():
+            if len(p.parts) < 2:
+                continue  # Release notes at the zip root are not addon files.
+            folders.add(p.parts[0])
+    if not folders:
+        raise ValueError("zip has no addon folder")
+    return sorted(folders)
+
+
 def download(project_id, f, dest):
     data = get(f"https://www.curseforge.com/api/v1/mods/{project_id}/files/{f['id']}/download")
     if f.get("fileLength") and len(data) != f["fileLength"]:
         raise RuntimeError(f"download is {len(data)} bytes, expected {f['fileLength']}")
     dest.write_bytes(data)
     with zipfile.ZipFile(dest) as z:
-        folders = set()
-        for m in z.infolist():
-            p = pathlib.PurePosixPath(m.filename)
-            if p.is_absolute() or ".." in p.parts or "\\" in m.filename:
-                raise ValueError(f"unsafe path in zip: {m.filename}")
-            if len(p.parts) > 1:
-                folders.add(p.parts[0])
-    return sorted(folders)
+        if z.testzip() is not None:
+            raise ValueError("zip checksum failed")
+        return archive_folders(z)
+
+
+def game_running(root):
+    if sys.platform != "darwin":
+        return False
+    executable = root / "_forever_/World of Warcraft.app/Contents/MacOS/World of Warcraft"
+    commands = subprocess.check_output(["/bin/ps", "-axo", "comm="], text=True).splitlines()
+    return str(executable) in (line.strip() for line in commands)
+
+
+def core_version(folder):
+    text = (folder / "ForeverCore.toc").read_text()
+    match = re.search(r"^## Version:\s*v?(\d+(?:\.\d+)*)", text, re.M)
+    if not match:
+        raise ValueError("unrecognized ForeverCore version")
+    return tuple(map(int, match.group(1).split(".")))
+
+
+def preserve_disenchant_patch(staged, installed):
+    load = b"Source_Classic\\Enchant\\Manifest.xml [AllowLoadGameType camelot][ExcludeLoadGameType classic, standard]"
+    old = installed / "Auctionator/Auctionator.toc"
+    toc = staged / "Auctionator/Auctionator.toc"
+    if not toc.exists() or not old.exists() or load not in old.read_bytes():
+        return
+    enchant = staged / "Auctionator/Source_Classic/Enchant"
+    if not (enchant / "Manifest.xml").is_file():
+        raise ValueError("Auctionator layout changed; review the disenchant patch")
+    for name in ("Main.lua", "DisenchantingProbabilities.lua"):
+        path = enchant / name
+        data = path.read_bytes()
+        if b"Enum.ItemQuality.Good" not in data and b"Enum.ItemQuality.Uncommon" not in data:
+            raise ValueError("Auctionator enchant code changed; review the disenchant patch")
+        path.write_bytes(data.replace(b"Enum.ItemQuality.Good", b"Enum.ItemQuality.Uncommon"))
+    data = toc.read_bytes()
+    if load not in data:
+        toc.write_bytes(data.rstrip(b"\r\n") + b"\r\n" + load + b"\r\n")
+
+
+def install_archive(archive, addons, backup, root):
+    with tempfile.TemporaryDirectory(prefix=".addon-update-", dir=addons.parent) as tmp:
+        staged, previous = pathlib.Path(tmp) / "new", pathlib.Path(tmp) / "previous"
+        previous.mkdir()
+        with zipfile.ZipFile(archive) as z:
+            folders = archive_folders(z)
+            z.extractall(staged)
+        incoming, current = staged / "ForeverCore", addons / "ForeverCore"
+        if incoming.exists() and current.exists() and core_version(incoming) < core_version(current):
+            shutil.rmtree(incoming)
+        preserve_disenchant_patch(staged, addons)
+        changed = [folder for folder in folders if (staged / folder).exists()]
+        if game_running(root):
+            raise BlockingIOError("WoW is open; update deferred")
+        for folder in changed:
+            if (addons / folder).exists():
+                shutil.copytree(addons / folder, backup / folder, symlinks=True)
+        if game_running(root):
+            raise BlockingIOError("WoW opened during backup; update deferred")
+        moved = []
+        try:
+            for folder in changed:
+                target = addons / folder
+                had_old = target.exists()
+                if had_old:
+                    target.rename(previous / folder)
+                moved.append((folder, had_old))
+                (staged / folder).rename(target)
+        except BaseException:
+            for folder, had_old in reversed(moved):
+                target = addons / folder
+                if target.exists():
+                    shutil.rmtree(target)
+                if had_old:
+                    (previous / folder).rename(target)
+            raise
+    return folders
 
 
 def check(args):
@@ -184,15 +272,24 @@ def sync(args):
         return 0
 
     addons_dir.mkdir(parents=True, exist_ok=True)
+    lock = None
     if DATA.is_dir():  # one sync at a time; a second run waits, then finds everything current
         lock = open(DATA / "sync.lock", "w")
         fcntl.flock(lock, fcntl.LOCK_EX)
+    if game_running(root):
+        say("DEFERRED WoW is open; no addon files changed")
+        if lock:
+            lock.close()
+        return 75
     state_path = DATA / "state.json"
     state = read_json(state_path, {})
+    backups = DATA / "backups" / "sync"
+    run_backup = backups / datetime.datetime.now().strftime("%Y%m%dT%H%M%S-%f")
     failed = 0
+    deferred = False
     with tempfile.TemporaryDirectory(prefix="wow-forever-addons-") as tmp:
         for a in load_addons(args.addons):
-            name, pid = a["name"], str(a["curseforge_id"])
+            name, pid = a["name"], str(int(a["curseforge_id"]))
             try:
                 f = pick_file(pid)
                 if not f:
@@ -202,18 +299,31 @@ def sync(args):
                     say(f"CURRENT {name}: {f['displayName']}")
                     continue
                 zip_path = pathlib.Path(tmp) / f"{pid}.zip"
-                folders = download(pid, f, zip_path)
-                with zipfile.ZipFile(zip_path) as z:
-                    z.extractall(addons_dir)
+                download(pid, f, zip_path)
+                run_backup.mkdir(parents=True, exist_ok=True)
+                if state_path.exists() and not (run_backup / "state.json").exists():
+                    shutil.copy2(state_path, run_backup / "state.json")
+                folders = install_archive(zip_path, addons_dir, run_backup / pid, root)
                 state[pid] = {"file_id": f["id"], "folders": folders}
                 say(f"{'UPDATED' if have else 'OK     '} {name}: {f['displayName']}")
+            except BlockingIOError as e:
+                say(f"DEFERRED {name}: {e}")
+                deferred = True
+                break
             except Exception as e:  # report and keep going with the rest
                 say(f"FAILED  {name}: {e}")
                 failed += 1
     if DATA.is_dir():
-        state_path.write_text(json.dumps(state, indent=1))
+        pending = state_path.with_suffix(".json.tmp")
+        pending.write_text(json.dumps(state, indent=1))
+        pending.replace(state_path)
+    if not failed and not deferred and backups.exists():
+        for old in sorted(p for p in backups.iterdir() if p.is_dir() and not p.is_symlink())[:-3]:
+            shutil.rmtree(old)
     say(f"AddOns folder: {addons_dir}")
-    return 1 if failed else 0
+    if lock:
+        lock.close()
+    return 75 if deferred else (1 if failed else 0)
 
 
 def main():

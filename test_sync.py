@@ -49,7 +49,7 @@ class MacInstallTests(unittest.TestCase):
             addon = root / "_forever_/Interface/AddOns/Questie/Questie.toc"
             addon.parent.mkdir(parents=True)
             addon.write_text("test addon")
-            with patch.object(install, "DATA", data), patch.object(install, "UNITS", root / "units"), patch.object(install.shutil, "which", return_value=None):
+            with patch.object(install, "DATA", data), patch.object(install, "UNITS", root / "units"), patch.object(install, "MAC_AGENT", root / "agent.plist"), patch.object(install.shutil, "which", return_value=None):
                 self.assertEqual(install.uninstall(), 0)
             self.assertFalse(data.exists())
             self.assertEqual(addon.read_text(), "test addon")
