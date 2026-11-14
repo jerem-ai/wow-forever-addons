@@ -52,7 +52,7 @@ Each sync reads the addon list from this repo. It never downloads new code. The 
 
 ### Scheduled Mac updates
 
-The optional Mac scheduler runs addon updates for Tuesday and Friday at 10 a.m. Pacific. A launch agent checks whether a run is due every 15 minutes and at login. Missed runs catch up when the Mac is awake and WoW is closed. A failed or deferred run stays pending.
+The optional Mac scheduler runs addon updates for Tuesday and Friday at 6 p.m. Pacific. A launch agent checks whether a run is due every 15 minutes and at login. Missed runs catch up when the Mac is awake and WoW is closed. A failed or deferred run stays pending.
 
 The scheduler uses `scheduled_mac.py` beside the installed `sync.py`, with launch agent `com.jeremyshank.wow-forever-addons`. It is configured separately from the normal Mac installer. The updater backs up changed addon folders, keeps the last three sync backups, preserves an existing Auctionator disenchant patch and keeps a newer installed ForeverCore when a bundle contains an older copy. It leaves WoW's saved UI settings alone.
 

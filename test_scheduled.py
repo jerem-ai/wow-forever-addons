@@ -140,18 +140,18 @@ class SafeUpdateTests(unittest.TestCase):
 class ScheduleTests(unittest.TestCase):
     def test_slots_wait_for_tuesday_and_friday_and_keep_pacific_time(self):
         zone = scheduled_mac.ZONE
-        tuesday = datetime.datetime(2026, 11, 17, 10, tzinfo=zone)
+        tuesday = datetime.datetime(2026, 11, 17, 18, tzinfo=zone)
         self.assertEqual(scheduled_mac.latest_slot(tuesday), tuesday)
         self.assertEqual(scheduled_mac.latest_slot(tuesday - datetime.timedelta(minutes=1)).weekday(), 4)
-        friday = datetime.datetime(2026, 11, 20, 10, tzinfo=zone)
+        friday = datetime.datetime(2026, 11, 20, 18, tzinfo=zone)
         self.assertEqual(scheduled_mac.latest_slot(friday.astimezone(datetime.timezone.utc)), friday)
-        self.assertEqual(scheduled_mac.latest_slot(datetime.datetime(2026, 3, 10, 10, tzinfo=zone)).utcoffset(),
+        self.assertEqual(scheduled_mac.latest_slot(datetime.datetime(2026, 3, 10, 18, tzinfo=zone)).utcoffset(),
                          datetime.timedelta(hours=-7))
 
     def test_open_game_waits_success_records_slot_and_duplicate_run_does_nothing(self):
         with tempfile.TemporaryDirectory() as tmp:
             data = pathlib.Path(tmp)
-            slot = datetime.datetime(2026, 11, 13, 10, tzinfo=scheduled_mac.ZONE)
+            slot = datetime.datetime(2026, 11, 13, 18, tzinfo=scheduled_mac.ZONE)
             with patch.object(sync, "DATA", data), patch.object(scheduled_mac, "latest_slot", return_value=slot), \
                  patch.object(sync, "find_wow_root", return_value=data / "WoW"), \
                  patch.object(sync, "game_running", return_value=True), \

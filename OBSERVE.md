@@ -51,7 +51,7 @@
 
 ## Scheduled Mac updates
 
-- Write site: `scheduled_mac.py` calls the installed `sync.py` for each due Tuesday/Friday 10 a.m. Pacific slot. The sync writes addon folders and updater state, with rollback copies under `~/.local/share/wow-forever-addons/backups/sync/`.
+- Write site: `scheduled_mac.py` calls the installed `sync.py` for each due Tuesday/Friday 6 p.m. Pacific slot. The sync writes addon folders and updater state, with rollback copies under `~/.local/share/wow-forever-addons/backups/sync/`.
 - Observe:
   ```sh
   launchctl print gui/$(id -u)/com.jeremyshank.wow-forever-addons

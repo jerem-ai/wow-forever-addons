@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 import sync
 
 ZONE = ZoneInfo("America/Los_Angeles")
-HOUR = 10
+HOUR = 18
 
 
 def latest_slot(now):
