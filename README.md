@@ -42,6 +42,16 @@ OpenMap adds a continuous world map. Press `M`, scroll to zoom and drag to pan; 
 
 EasyMarks Forever opens a marker wheel when needed. Select a mob and type `/emf`, or double-left-click a mob outside combat. Under Options > Keybindings > EasyMarks Forever, bind **Toggle raid marker wheel** to use it in combat. `/emf world` opens ground markers; these need a group and marking permission. `/emf status` shows its status. No keys are assigned automatically.
 
+## Gathering, loot and buffs
+
+Lueur highlights the nearby object selected by the game's soft targeting, such as ore, herbs, quest objects and chests. `/lueur` opens its options. It changes interaction targeting settings while enabled, so check controller interaction after the first launch.
+
+LootOptimizer Forever suggests a cheap bag item to discard when your bags are full. `/lof settings` opens its options. Clicking **Swap** destroys the displayed bag item to make room; review the item before confirming. Auctionator prices are optional and Auctionator is already in this list.
+
+BuffRadar lists nearby players who need your buffs and lets you click to cast. `/br show` opens the list, `/br config` opens its settings and `/br buffs` lists the available buffs.
+
+These addons are included in `addons.json`. Fully quit and relaunch WoW after their first install.
+
 ## What it puts on your PC
 
 - Windows: `%LOCALAPPDATA%\wow-forever-addons\` (the sync script, its log and a record of what it installed) and a scheduled task named "WoW Forever addons sync".

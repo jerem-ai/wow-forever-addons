@@ -60,3 +60,14 @@
   tail -40 ~/.local/share/wow-forever-addons/sync.log
   ```
 - Healthy: the launch agent is loaded with a 900-second interval. The ledger records the most recent completed scheduled slot. The logs show `DONE` and sync exit 0, or `DEFERRED` while WoW is open. No network update runs between completed slots. A failed sync leaves the slot pending. Code on disk still needs an in-game check after restarting WoW.
+
+## Lueur, LootOptimizer and BuffRadar
+
+- Write site: the existing sync installs projects `1732324`, `1716046` and `1742512` from `addons.json` into `Lueur`, `LOF` and `BuffRadar`, and records their file IDs in `state.json`.
+- Observe on Mac:
+  ```sh
+  rg '^## (Interface|Version|Dependencies|RequiredDeps):' "/Applications/World of Warcraft/_forever_/Interface/AddOns/"{Lueur/Lueur,LOF/LOF,BuffRadar/BuffRadar}.toc
+  python3 -c 'import json,pathlib; s=json.loads((pathlib.Path.home()/".local/share/wow-forever-addons/state.json").read_text()); print({p:s.get(p) for p in ("1732324","1716046","1742512")})'
+  tail -35 ~/.local/share/wow-forever-addons/sync.log
+  ```
+- Healthy: each folder declares interface `16001`, has an installed file ID, and reports `OK`, `UPDATED` or `CURRENT`. After fully restarting WoW, verify `/lueur`, `/lof settings` and `/br show`; check a gathering or quest object's glow, controller interaction and the mage's buff list. Review LootOptimizer's proposed discarded item before clicking Swap. File checks do not establish the in-game layout.
