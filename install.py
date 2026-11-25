@@ -79,7 +79,10 @@ def main():
     with urllib.request.urlopen(f"{REPO}/sync.py", timeout=60) as r:
         sync.write_bytes(r.read())
     if args.wow_root:
-        (DATA / "config.json").write_text(json.dumps({"wow_root": args.wow_root}))
+        config_path = DATA / "config.json"
+        config = json.loads(config_path.read_text()) if config_path.exists() else {}
+        config["wow_root"] = args.wow_root
+        config_path.write_text(json.dumps(config))
 
     found = subprocess.run([sys.executable, str(sync), "--find-only"])
     if found.returncode == 2:

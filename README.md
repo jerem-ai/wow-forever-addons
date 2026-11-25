@@ -78,6 +78,10 @@ The scheduler uses `scheduled_mac.py` beside the installed `sync.py`, with launc
 
 It adds and updates addons in `_forever_\Interface\AddOns`. Updates replace the managed addon folders and keep rollback copies. An addon dropped from the list stays installed until you remove it yourself.
 
+### Exclude an addon on one Mac or Linux computer
+
+Add an `exclude_ids` array to `~/.local/share/wow-forever-addons/config.json`, preserving its other fields. For example, `"exclude_ids": [1701034]` skips High Fidelity World Map on that computer. The sync logs `SKIPPED` and leaves that addon's folder alone; remove the folder yourself after fully quitting WoW if you want to reclaim its space. Remove the ID from the array to resume installation and updates. This setting leaves the shared addon list unchanged and is preserved when rerunning the Python installer with `--wow-root`.
+
 ## Something wrong?
 
 Send the log: `%LOCALAPPDATA%\wow-forever-addons\sync.log` on Windows, `~/.local/share/wow-forever-addons/sync.log` on Mac or Linux.

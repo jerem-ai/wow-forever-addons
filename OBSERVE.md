@@ -6,8 +6,14 @@
 - Observe: ask the friend for the last lines of the log.
   - Windows: `Get-Content "$env:LOCALAPPDATA\wow-forever-addons\sync.log" -Tail 30`
   - Linux: `tail -30 ~/.local/share/wow-forever-addons/sync.log; systemctl --user list-timers wow-forever-addons.timer`
-- Shape: a `== <date> exit <code>` header, then one line per addon (`OK`, `UPDATED`, `CURRENT` or `FAILED`), then the AddOns folder.
-- Healthy: a header from the last day with `exit 0`, and every addon `CURRENT` or `UPDATED`.
+- Shape: a `== <date> exit <code>` header, then one line per addon (`OK`, `UPDATED`, `CURRENT`, `SKIPPED` or `FAILED`), then the AddOns folder.
+- Healthy: a header from the last day with `exit 0`, and every addon installed, current or intentionally skipped.
+
+## Local exclusions on Mac and Linux
+
+- Write site: `sync.py` reads `exclude_ids` from the local `config.json` before downloading or installing projects. `install.py` preserves that field when setting `wow_root`.
+- Observe: `python3 -c 'import json,pathlib; print(json.loads((pathlib.Path.home()/".local/share/wow-forever-addons/config.json").read_text()).get("exclude_ids", []))'` and `tail -40 ~/.local/share/wow-forever-addons/sync.log`.
+- Healthy: each excluded project reports `SKIPPED`, has no download attempt, and stays absent if its folder was removed. Projects outside the exclusion list continue updating. An invalid exclusion list fails before touching addon folders. Remove a project's ID to restore it on the next sync.
 
 ## Baganator and Questie dependencies
 

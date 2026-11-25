@@ -136,6 +136,36 @@ class SafeUpdateTests(unittest.TestCase):
         self.assertEqual(state["2"]["file_id"], 1)
         self.assertEqual((self.addons / "B/main.lua").read_text(), "old B")
 
+    def test_local_exclusion_skips_download_even_when_folder_is_missing(self):
+        data = self.root / "data"
+        data.mkdir()
+        (data / "config.json").write_text(json.dumps({"exclude_ids": [1]}))
+        self.put("B/main.lua", "current B")
+        original = {"1": {"file_id": 1, "folders": ["A"]},
+                    "2": {"file_id": 1, "folders": ["B"]}}
+        (data / "state.json").write_text(json.dumps(original))
+        with patch.object(sync, "DATA", data), \
+             patch.object(sync, "find_wow_root", return_value=self.root / "WoW"), \
+             patch.object(sync, "load_addons", return_value=[{"name": n, "curseforge_id": p} for n, p in [("A", 1), ("B", 2)]]), \
+             patch.object(sync, "pick_file", return_value={"id": 1, "displayName": "current"}) as pick, \
+             patch.object(sync, "download") as download:
+            self.assertEqual(sync.sync(SimpleNamespace(wow_root=None, find_only=False, addons="unused")), 0)
+        pick.assert_called_once_with("2")
+        download.assert_not_called()
+        self.assertFalse((self.addons / "A").exists())
+        self.assertEqual((self.addons / "B/main.lua").read_text(), "current B")
+        self.assertEqual(json.loads((data / "state.json").read_text()), original)
+
+    def test_invalid_exclusions_fail_before_touching_addons(self):
+        data = self.root / "data"
+        data.mkdir()
+        for value in ("1", [True], ["1"], [0], [-1], None):
+            with self.subTest(value=value):
+                (data / "config.json").write_text(json.dumps({"exclude_ids": value}))
+                with patch.object(sync, "DATA", data), patch.object(sync, "find_wow_root") as find:
+                    self.assertEqual(sync.sync(SimpleNamespace(wow_root=None, find_only=False, addons="unused")), 1)
+                find.assert_not_called()
+
 
 class ScheduleTests(unittest.TestCase):
     def test_slots_wait_for_tuesday_and_friday_and_keep_pacific_time(self):

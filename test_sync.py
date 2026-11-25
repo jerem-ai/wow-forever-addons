@@ -1,6 +1,9 @@
+import io
+import json
 import pathlib
 import tempfile
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import install
@@ -8,6 +11,20 @@ import sync
 
 
 class MacInstallTests(unittest.TestCase):
+    def test_reinstall_with_wow_root_preserves_local_exclusions(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            data = pathlib.Path(tmp)
+            config = data / "config.json"
+            config.write_text(json.dumps({"wow_root": "old", "exclude_ids": [1701034]}))
+            with patch.object(install, "DATA", data), \
+                 patch.object(install.sys, "argv", ["install.py", "--wow-root", "/Applications/World of Warcraft"]), \
+                 patch.object(install.urllib.request, "urlopen", return_value=io.BytesIO(b"# sync")), \
+                 patch.object(install.subprocess, "run", return_value=SimpleNamespace(returncode=0)), \
+                 patch.object(install.shutil, "which", return_value=None):
+                self.assertEqual(install.main(), 0)
+            self.assertEqual(json.loads(config.read_text()),
+                             {"wow_root": "/Applications/World of Warcraft", "exclude_ids": [1701034]})
+
     def test_finds_native_mac_app_in_path_with_spaces(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp) / "World of Warcraft"

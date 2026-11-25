@@ -261,6 +261,10 @@ def check(args):
 
 def sync(args):
     config = read_json(DATA / "config.json", {})
+    excluded = config.get("exclude_ids", [])
+    if not isinstance(excluded, list) or any(type(pid) is not int or pid <= 0 for pid in excluded):
+        say("FAILED config.json: exclude_ids must be a list of positive CurseForge project IDs")
+        return 1
     root = find_wow_root(args.wow_root or config.get("wow_root"))
     if not root:
         say("WoW Forever not found (no native Mac app or Wow.exe in _forever_). Install it through Battle.net first, "
@@ -290,6 +294,9 @@ def sync(args):
     with tempfile.TemporaryDirectory(prefix="wow-forever-addons-") as tmp:
         for a in load_addons(args.addons):
             name, pid = a["name"], str(int(a["curseforge_id"]))
+            if int(pid) in excluded:
+                say(f"SKIPPED {name}: excluded on this computer")
+                continue
             try:
                 f = pick_file(pid)
                 if not f:
