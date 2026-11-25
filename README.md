@@ -56,7 +56,7 @@ These addons are included in `addons.json`. Fully quit and relaunch WoW after th
 
 Chronicle by Purist records your character's gear and appearance as you level. `/chronicle` opens the history. Its shared Purist settings addon is bundled with the download.
 
-Dalorrian's Podium shows end-of-run group awards. `/podium` opens its options and `/podium test` previews an award screen. Automatic chat posting is off by default; the SEND button posts the results to the selected channel.
+Dalorrian's Podium shows end-of-run group awards. `/podium` opens the latest award screen and `/podium test` previews one. `/podium help` opens its settings and help. Automatic chat posting is off by default; the SEND button posts the results to the selected channel.
 
 LevelUpCalculator estimates the XP, quests and kills remaining until your next level. `/luc` opens its controls. The current Forever build is labeled beta.
 
