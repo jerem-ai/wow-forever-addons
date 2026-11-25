@@ -29,6 +29,12 @@
     {"name": "OpenMap", "curseforge_id": 1735937},
     {"name": "Lueur", "curseforge_id": 1732324},
     {"name": "LootOptimizer Forever", "curseforge_id": 1716046},
-    {"name": "BuffRadar", "curseforge_id": 1742512}
+    {"name": "BuffRadar", "curseforge_id": 1742512},
+    {"name": "Chronicle by Purist", "curseforge_id": 1718785},
+    {"name": "Dalorrian's Podium", "curseforge_id": 1717948},
+    {"name": "LevelUpCalculator", "curseforge_id": 1208323},
+    {"name": "savyUI", "curseforge_id": 1722589},
+    {"name": "savyUI Aura Tracker", "curseforge_id": 1796253},
+    {"name": "savyUI Reminders", "curseforge_id": 1796247}
   ]
 }

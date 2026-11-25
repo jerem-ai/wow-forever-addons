@@ -52,6 +52,16 @@ BuffRadar lists nearby players who need your buffs and lets you click to cast. `
 
 These addons are included in `addons.json`. Fully quit and relaunch WoW after their first install.
 
+## Character history and UI tools
+
+Chronicle by Purist records your character's gear and appearance as you level. `/chronicle` opens the history. Its shared Purist settings addon is bundled with the download.
+
+Dalorrian's Podium shows end-of-run group awards. `/podium` opens its options and `/podium test` previews an award screen. Automatic chat posting is off by default; the SEND button posts the results to the selected channel.
+
+LevelUpCalculator estimates the XP, quests and kills remaining until your next level. `/luc` opens its controls. The current Forever build is labeled beta.
+
+savyUI includes the separate Aura Tracker and Reminders modules in this list. Both require the base savyUI addon. `/savyui` opens its settings; middle-click its minimap button to enter Edit Mode and position the tracker icons. When using Threat Plates and X-Perl, turn off savyUI's nameplate buffs, nameplate control effects, unit-frame aura changes, aggro overlay and target-range display if they duplicate your existing UI. Auto-repair, junk selling and trade announcements are off by default.
+
 ## What it puts on your PC
 
 - Windows: `%LOCALAPPDATA%\wow-forever-addons\` (the sync script, its log and a record of what it installed) and a scheduled task named "WoW Forever addons sync".

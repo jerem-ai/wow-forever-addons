@@ -71,3 +71,13 @@
   tail -35 ~/.local/share/wow-forever-addons/sync.log
   ```
 - Healthy: each folder declares interface `16001`, has an installed file ID, and reports `OK`, `UPDATED` or `CURRENT`. After fully restarting WoW, verify `/lueur`, `/lof settings` and `/br show`; check a gathering or quest object's glow, controller interaction and the mage's buff list. Review LootOptimizer's proposed discarded item before clicking Swap. File checks do not establish the in-game layout.
+
+## Chronicle, Podium, LevelUpCalculator and savyUI
+
+- Write site: the existing sync installs projects `1718785`, `1717948`, `1208323`, `1722589`, `1796253` and `1796247` from `addons.json`. Chronicle bundles `Purist` and an old-save migration addon; savyUI's Aura Tracker and Reminders each require the separate `savyUI` folder.
+- Observe on Mac:
+  ```sh
+  rg '^## (Interface|Version|RequiredDeps):' "/Applications/World of Warcraft/_forever_/Interface/AddOns/"{Purist_Chronicle/Purist_Chronicle,Podium/Podium,LevelUpCalculator_Forever/LevelUpCalculator_Forever,savyUI/savyUI,savyUI_AuraTracker/savyUI_AuraTracker,savyUI_Reminders/savyUI_Reminders}.toc
+  tail -40 ~/.local/share/wow-forever-addons/sync.log
+  ```
+- Healthy: all six projects have installed file IDs in `state.json`, all folders exist, and their TOCs include interface `16001`. After fully restarting WoW, verify `/chronicle`, `/podium test`, `/luc` and `/savyui`; check the aura and reminder icons alongside the existing layout. Podium's automatic chat posting should remain off unless you choose to enable it. LevelUpCalculator is currently a beta. Archive and dependency checks do not establish live UI behavior.
