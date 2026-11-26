@@ -52,6 +52,8 @@ BuffRadar lists nearby players who need your buffs and lets you click to cast. `
 
 These addons are included in `addons.json`. Fully quit and relaunch WoW after their first install.
 
+Better Fishing by Yuyuli adds one-button casting and hooking. Equip a fishing pole and bind a key or controller button under Options > Keybindings > Better Fishing > Cast and Interact. Press it to cast, wait for a bite, then press it again to reel in. `/bf` opens its options. Double-right-click casting and fishing auto-loot are optional settings. The addon assigns no keys automatically. Lueur can keep highlighting your bobber; both current releases request a 60-yard interaction range while fishing. Check their combined behavior in game after restarting WoW.
+
 ## Character history and UI tools
 
 Chronicle by Purist records your character's gear and appearance as you level. `/chronicle` opens the history. Its shared Purist settings addon is bundled with the download.

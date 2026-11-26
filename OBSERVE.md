@@ -87,3 +87,14 @@
   tail -40 ~/.local/share/wow-forever-addons/sync.log
   ```
 - Healthy: all six projects have installed file IDs in `state.json`, all folders exist, and their TOCs include interface `16001`. After fully restarting WoW, verify `/chronicle`, `/podium test`, `/luc` and `/savyui`; check the aura and reminder icons alongside the existing layout. Podium's automatic chat posting should remain off unless you choose to enable it. LevelUpCalculator is currently a beta. Archive and dependency checks do not establish live UI behavior.
+
+## Better Fishing
+
+- Write site: the existing sync installs CurseForge project `709520` from `addons.json` into `BetterFishing` and records its file ID in `state.json`.
+- Observe on Mac:
+  ```sh
+  rg '^## (Interface|Version):' "/Applications/World of Warcraft/_forever_/Interface/AddOns/BetterFishing/BetterFishing.toc"
+  python3 -c 'import json,pathlib; print(json.loads((pathlib.Path.home()/".local/share/wow-forever-addons/state.json").read_text()).get("709520"))'
+  tail -40 ~/.local/share/wow-forever-addons/sync.log
+  ```
+- Healthy: the folder includes `Bindings.xml`, the TOC includes interface `16001`, and the updater reports `OK`, `UPDATED` or `CURRENT`. After a full WoW restart, equip a fishing pole, bind Cast and Interact under Better Fishing, and verify a cast and catch with the same button while Lueur is enabled. No key is assigned automatically, and file checks do not verify controller input or fishing interaction.
