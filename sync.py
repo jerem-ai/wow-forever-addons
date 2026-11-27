@@ -14,6 +14,7 @@ import argparse
 import datetime
 import fcntl
 import glob
+import hashlib
 import json
 import os
 import pathlib
@@ -27,6 +28,7 @@ import urllib.request
 import zipfile
 
 ADDONS_URL = "https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/addons.json"
+UI_URL = "https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/SquadUI.zip"
 FOREVER = 88568  # CurseForge gameVersionTypeId for WoW Forever (1.60.x)
 UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/130.0 Safari/537.36")
@@ -109,21 +111,44 @@ def read_json(path, default):
         return default
 
 
-def load_addons(source):
+def catalog_addons(catalog, profile="squad"):
+    if profile not in ("squad", "full"):
+        raise ValueError("profile must be squad or full")
+    addons = list(catalog["addons"])
+    if profile == "full":
+        addons += catalog.get("optional_addons", [])
+    if catalog.get("ui_bundle"):
+        addons.append(catalog["ui_bundle"])
+    return addons
+
+
+def load_addons(source, profile="squad"):
     """The addon list from GitHub, falling back to the last copy that loaded."""
     cache = DATA / "addons.cache.json"
     try:
         raw = pathlib.Path(source).read_bytes() if os.path.exists(source) else get(source)
-        addons = json.loads(raw)["addons"]
+        catalog = json.loads(raw)
+        catalog_addons(catalog, profile)
         if os.path.exists(str(DATA)):
             cache.write_bytes(raw)
-        return addons
     except Exception as e:
         cached = read_json(cache, None)
         if cached:
             say(f"WARNING addon list unreachable ({e}); using the copy from the last sync")
-            return cached["addons"]
-        raise
+            catalog = cached
+        else:
+            raise
+    return catalog_addons(catalog, profile)
+
+
+def resolve_addon(addon):
+    if "bundle" in addon:
+        if addon["bundle"] != "SquadUI" or not re.fullmatch(r"[0-9a-f]{64}", addon.get("sha256", "")):
+            raise ValueError("invalid SquadUI bundle metadata")
+        return "SquadUI", {"id": addon["sha256"], "sha256": addon["sha256"],
+                           "displayName": "Squad UI " + addon["version"]}
+    pid = str(int(addon["curseforge_id"]))
+    return pid, pick_file(pid)
 
 
 def pick_file(project_id):
@@ -153,7 +178,10 @@ def archive_folders(z):
 
 
 def download(project_id, f, dest):
-    data = get(f"https://www.curseforge.com/api/v1/mods/{project_id}/files/{f['id']}/download")
+    url = UI_URL if project_id == "SquadUI" else f"https://www.curseforge.com/api/v1/mods/{project_id}/files/{f['id']}/download"
+    data = get(url)
+    if project_id == "SquadUI" and hashlib.sha256(data).hexdigest() != f["sha256"]:
+        raise ValueError("SquadUI checksum failed")
     if f.get("fileLength") and len(data) != f["fileLength"]:
         raise RuntimeError(f"download is {len(data)} bytes, expected {f['fileLength']}")
     dest.write_bytes(data)
@@ -240,27 +268,31 @@ def install_archive(archive, addons, backup, root):
 
 def check(args):
     """Canary: every addon still resolves to a Forever file that downloads and unzips."""
-    addons = json.loads(pathlib.Path(args.addons).read_text())["addons"]
+    addons = catalog_addons(json.loads(pathlib.Path(args.addons).read_text()), "full")
     addons += [{"name": f"extra {i}", "curseforge_id": int(i)} for i in args.extra_ids]
     failed = 0
     with tempfile.TemporaryDirectory() as tmp:
         for a in addons:
             try:
-                f = pick_file(a["curseforge_id"])
+                pid, f = resolve_addon(a)
                 if not f:
                     raise RuntimeError("no Forever file on CurseForge")
-                folders = download(a["curseforge_id"], f, pathlib.Path(tmp) / "a.zip")
+                folders = download(pid, f, pathlib.Path(tmp) / "a.zip")
                 if not folders:
                     raise RuntimeError("zip has no addon folder")
                 say(f"OK      {a['name']}: {f['displayName']} ({', '.join(folders)})")
             except Exception as e:
-                say(f"FAILED  {a['name']} ({a['curseforge_id']}): {e}")
+                say(f"FAILED  {a['name']}: {e}")
                 failed += 1
     return 1 if failed else 0
 
 
 def sync(args):
     config = read_json(DATA / "config.json", {})
+    profile = config.get("profile", "squad")
+    if profile not in ("squad", "full"):
+        say("FAILED config.json: profile must be squad or full")
+        return 1
     excluded = config.get("exclude_ids", [])
     if not isinstance(excluded, list) or any(type(pid) is not int or pid <= 0 for pid in excluded):
         say("FAILED config.json: exclude_ids must be a list of positive CurseForge project IDs")
@@ -292,13 +324,13 @@ def sync(args):
     failed = 0
     deferred = False
     with tempfile.TemporaryDirectory(prefix="wow-forever-addons-") as tmp:
-        for a in load_addons(args.addons):
-            name, pid = a["name"], str(int(a["curseforge_id"]))
-            if int(pid) in excluded:
+        for a in load_addons(args.addons, profile):
+            name = a["name"]
+            if a.get("curseforge_id") in excluded:
                 say(f"SKIPPED {name}: excluded on this computer")
                 continue
             try:
-                f = pick_file(pid)
+                pid, f = resolve_addon(a)
                 if not f:
                     raise RuntimeError("no Forever file on CurseForge")
                 have = state.get(pid, {})

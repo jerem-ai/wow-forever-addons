@@ -1,0 +1,10 @@
+## Interface: 16001
+## Title: Squad UI
+## Notes: Readable frames and quiet quest helpers. /squadui to apply; /squadui undo to restore.
+## Author: Jeremy's squad
+## Version: 1.0.0
+## SavedVariablesPerCharacter: SquadUIState
+## OptionalDeps: Auctionator, Questie, QuestTogether, XPerlForever, XPerlForever_Player, XPerlForever_Target, XPerlForever_PlayerBuffs, XPerlForever_XPCC, TidyPlates_ThreatPlates, Leatrix_Plus, DBM-Core, DBM-StatusBarTimers
+
+Optional.lua
+SquadUI.lua

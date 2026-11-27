@@ -70,6 +70,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--wow-root")
     ap.add_argument("--uninstall", action="store_true")
+    ap.add_argument("--profile", choices=("squad", "full"))
     args = ap.parse_args()
     if args.uninstall:
         return uninstall()
@@ -78,11 +79,12 @@ def main():
     sync = DATA / "sync.py"
     with urllib.request.urlopen(f"{REPO}/sync.py", timeout=60) as r:
         sync.write_bytes(r.read())
+    config_path = DATA / "config.json"
+    config = json.loads(config_path.read_text()) if config_path.exists() else {}
+    config["profile"] = args.profile or config.get("profile", "squad")
     if args.wow_root:
-        config_path = DATA / "config.json"
-        config = json.loads(config_path.read_text()) if config_path.exists() else {}
         config["wow_root"] = args.wow_root
-        config_path.write_text(json.dumps(config))
+    config_path.write_text(json.dumps(config))
 
     found = subprocess.run([sys.executable, str(sync), "--find-only"])
     if found.returncode == 2:
@@ -104,6 +106,10 @@ def main():
     else:
         print("Automatic updates aren't configured on this computer. Rerun the install command to update.", flush=True)
 
+    if code == 0:
+        print("Restart WoW, then type /squadui to choose the optional UI preset.", flush=True)
+    elif code == 75:
+        print("Quit WoW fully and rerun this command to finish installing.", flush=True)
     return code
 
 

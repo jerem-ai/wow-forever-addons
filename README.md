@@ -1,105 +1,118 @@
-# WoW Forever addons
+# WoW Forever squad addons
 
-Installs our group's WoW Forever addons. Windows and Linux check for updates at login and daily. On Mac, rerun the install command to update.
+A lean default for questing together: readable frames and buff timers, quest and map help, bags, Auctionator, DBM and party quest sharing. Leveling dashboards, meters, gear scoring, voices and farming tools are optional.
 
-## Install
+## Install or update
 
-**Windows.** Open PowerShell (no admin needed) and paste:
+Fully quit WoW first. Rerun this command even if you used the old installer; it adds profile support and the shared UI preset.
+
+Windows: open PowerShell, with no admin rights needed, and paste:
 
 ```powershell
 irm https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/install.ps1 | iex
 ```
 
-**Mac or Linux** (Steam Deck desktop mode, Bazzite, other distros). Quit WoW, open Terminal and paste:
+Mac or Linux, including Steam Deck desktop mode and Bazzite: open Terminal and paste:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/install.py | python3 -
 ```
 
-On Mac, this finds WoW in `/Applications/World of Warcraft` or `~/Applications/World of Warcraft`. It needs Python 3. Relaunch WoW through Battle.net after the install finishes.
-
-The last line tells you how it went. If it says WoW Forever wasn't found, point it at your World of Warcraft folder (the one that holds `_forever_`):
+Mac needs Python 3. The installer finds WoW in `/Applications/World of Warcraft` or `~/Applications/World of Warcraft`. If it cannot find your installation, specify the folder containing `_forever_`:
 
 ```powershell
-$env:WOW_FOREVER_ROOT = 'D:\Games\World of Warcraft'; irm https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/install.ps1 | iex
+$env:WOW_FOREVER_ROOT = 'D:\Games\World of Warcraft'
+irm https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/install.ps1 | iex
 ```
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/install.py | python3 - --wow-root "/path/to/World of Warcraft"
 ```
 
-## The addons
+After installation finishes, launch WoW through Battle.net.
 
-The list lives in [`addons.json`](addons.json). Right now: Road To Sixty, QuestTogether, EasyMarksForever, Lore Forever, GearQuest Forever, DungeonJournal, Forever Quest Tint, What's Training?, Threat Plates, Auctionator, DBM (core and dungeons), X-Perl UnitFrames, Questie with QuestieDB, Details!, Leatrix Plus, Baganator with Syndicator, Does It Die, SkillUp Forever, Shortest Path Forever, Books on Map Forever, High Fidelity World Map, OpenMap and Lore Forever's quest voices (male narrator and quest givers, about 716 MB, off until you turn on Speak quest dialogue in Lore Forever's Options). Each one downloads straight from CurseForge, the Forever build only.
+## Choose the UI preset
 
-QuestieDB supplies Questie's quest data. Syndicator supplies Baganator's inventory data. Both are separate addons and must stay in the list, since our sync installs only the projects listed here.
+In game, type `/squadui` and choose Apply preset, then Reload. Until you choose Apply, the companion addon leaves your UI and enabled addons as they are.
 
-High Fidelity World Map adds an HD/SD button to the world map. Open the map with `M` and use that button to switch views. Its zone and cave views use the game's textures. The optional Art companion supplies higher-resolution continent and world maps as a separate download. After installing a new addon folder, quit WoW fully and launch it again to load it.
+The preset enlarges buff and debuff icons and countdown text, puts player and target frames below the character, and makes DBM text and bars more readable. It uses the native quest tracker, keeps Questie map markers, and quiets QuestTogether's announcements and extra quest display. Party quest sharing stays available.
 
-## OpenMap and marking
+It also turns off the optional addons listed below for your current character. Their files and saved data stay on disk. You can enable individual extras again in the game's AddOns menu.
 
-OpenMap adds a continuous world map. Press `M`, scroll to zoom and drag to pan; `/openmap` opens its options. The current Forever release supports Questie 12.8, Books on Map and High Fidelity World Map. OpenMap hides High Fidelity's overlay while its continuous map is showing and restores it on other maps. Fully quit and restart WoW after the first install.
+Appearance changes use each addon's active profile, which may be shared by your other characters. `/squadui undo` restores the settings and addon choices captured before Apply, including your previous frame positions. Undo also replaces any later edits to those same fields. `/squadui status` shows whether the preset has been applied. The preset runs once when you choose it and keeps your later adjustments on future logins.
 
-EasyMarks Forever opens a marker wheel when needed. Select a mob and type `/emf`, or double-left-click a mob outside combat. Under Options > Keybindings > EasyMarks Forever, bind **Toggle raid marker wheel** to use it in combat. `/emf world` opens ground markers; these need a group and marking permission. `/emf status` shows its status. No keys are assigned automatically.
+Apply it on each character that wants the preset. For a different screen size, undo and apply again to place the frames using the current screen dimensions. Controller bindings stay yours.
 
-## Gathering, loot and buffs
+## Default pack
 
-Lueur highlights the nearby object selected by the game's soft targeting, such as ore, herbs, quest objects and chests. `/lueur` opens its options. It changes interaction targeting settings while enabled, so check controller interaction after the first launch.
+The `squad` profile installs 14 CurseForge projects and the Squad UI companion:
 
-LootOptimizer Forever suggests a cheap bag item to discard when your bags are full. `/lof settings` opens its options. Clicking **Swap** destroys the displayed bag item to make room; review the item before confirming. Auctionator prices are optional and Auctionator is already in this list.
+- X-Perl UnitFrames, including its buff countdown module, and Threat Plates.
+- Questie with QuestieDB, OpenMap, What's Training? and Leatrix Plus.
+- Baganator with Syndicator, Auctionator, DBM core and DBM dungeons.
+- QuestTogether and EasyMarks Forever.
 
-BuffRadar lists nearby players who need your buffs and lets you click to cast. `/br show` opens the list, `/br config` opens its settings and `/br buffs` lists the available buffs.
+QuestieDB and Syndicator supply required data for Questie and Baganator. Keep both enabled.
 
-These addons are included in `addons.json`. Fully quit and relaunch WoW after their first install.
+OpenMap: press `M`, scroll to zoom, and drag to pan. `/openmap` opens its options. For quest markers that were hidden in your previous settings, check `/questie`; applying the preset preserves your map visibility choice.
 
-Better Fishing by Yuyuli adds one-button casting and hooking. Equip a fishing pole and bind a key or controller button under Options > Keybindings > Better Fishing > Cast and Interact. Press it to cast, wait for a bite, then press it again to reel in. `/bf` opens its options. Double-right-click casting and fishing auto-loot are optional settings. The addon assigns no keys automatically. Lueur can keep highlighting your bobber; both current releases request a 60-yard interaction range while fishing. Check their combined behavior in game after restarting WoW.
+EasyMarks: select a mob and double-left-click outside combat, or type `/emf`. For combat, bind Toggle raid marker wheel under Options > Keybindings > EasyMarks Forever. `/emf world` opens ground markers when you have group marking permission. No keys are assigned automatically.
 
-## Character history and UI tools
+## Optional extras
 
-Chronicle by Purist records your character's gear and appearance as you level. `/chronicle` opens the history. Its shared Purist settings addon is bundled with the download.
+The full profile adds the other 23 projects: Road To Sixty, Lore Forever and its voice packs, GearQuest, DungeonJournal, Forever Quest Tint, Details!, Does It Die, SkillUp, Shortest Path, Books on Map, High Fidelity World Map, Lueur, LootOptimizer, BuffRadar, Chronicle, Podium, LevelUpCalculator, savyUI with Aura Tracker and Reminders, and Better Fishing. The voice packs alone add about 716 MB.
 
-Dalorrian's Podium shows end-of-run group awards. `/podium` opens the latest award screen and `/podium test` previews one. `/podium help` opens its settings and help. Automatic chat posting is off by default; the SEND button posts the results to the selected channel.
+To install and update all extras on Mac or Linux:
 
-LevelUpCalculator estimates the XP, quests and kills remaining until your next level. `/luc` opens its controls. The current Forever build is labeled beta.
+```sh
+curl -fsSL https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/install.py | python3 - --profile full
+```
 
-savyUI includes the separate Aura Tracker and Reminders modules in this list. Both require the base savyUI addon. `/savyui` opens its settings; middle-click its minimap button to enter Edit Mode and position the tracker icons. When using Threat Plates and X-Perl, turn off savyUI's nameplate buffs, nameplate control effects, unit-frame aura changes, aggro overlay and target-range display if they duplicate your existing UI. Auto-repair, junk selling and trade announcements are off by default.
-
-## What it puts on your PC
-
-- Windows: `%LOCALAPPDATA%\wow-forever-addons\` (the sync script, its log and a record of what it installed) and a scheduled task named "WoW Forever addons sync".
-- Linux: `~/.local/share/wow-forever-addons/` and a systemd user timer named `wow-forever-addons.timer`.
-- Mac: `~/.local/share/wow-forever-addons/`. Rerun the install command to check for updates.
-
-Each sync reads the addon list from this repo. It never downloads new code. The script only changes when you run the install line again.
-
-### Scheduled Mac updates
-
-The optional Mac scheduler runs addon updates for Tuesday and Friday at 6 p.m. Pacific. A launch agent checks whether a run is due every 15 minutes and at login. Missed runs catch up when the Mac is awake and WoW is closed. A failed or deferred run stays pending.
-
-The scheduler uses `scheduled_mac.py` beside the installed `sync.py`, with launch agent `com.jeremyshank.wow-forever-addons`. It is configured separately from the normal Mac installer. The updater backs up changed addon folders, keeps the last three sync backups, preserves an existing Auctionator disenchant patch and keeps a newer installed ForeverCore when a bundle contains an older copy. It leaves WoW's saved UI settings alone.
-
-It adds and updates addons in `_forever_\Interface\AddOns`. Updates replace the managed addon folders and keep rollback copies. An addon dropped from the list stays installed until you remove it yourself.
-
-### Exclude an addon on one Mac or Linux computer
-
-Add an `exclude_ids` array to `~/.local/share/wow-forever-addons/config.json`, preserving its other fields. For example, `"exclude_ids": [1701034]` skips High Fidelity World Map on that computer. The sync logs `SKIPPED` and leaves that addon's folder alone; remove the folder yourself after fully quitting WoW if you want to reclaim its space. Remove the ID from the array to resume installation and updates. This setting leaves the shared addon list unchanged and is preserved when rerunning the Python installer with `--wow-root`.
-
-## Something wrong?
-
-Send the log: `%LOCALAPPDATA%\wow-forever-addons\sync.log` on Windows, `~/.local/share/wow-forever-addons/sync.log` on Mac or Linux.
-
-## Remove it
+On Windows:
 
 ```powershell
-$env:WOW_FOREVER_UNINSTALL = '1'; irm https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/install.ps1 | iex
+$env:WOW_FOREVER_PROFILE = 'full'
+irm https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/install.ps1 | iex
+```
+
+Your selection is saved for future updates. To return to the lean profile, rerun with `--profile squad` on Mac/Linux or `$env:WOW_FOREVER_PROFILE = 'squad'` on Windows. Existing optional addon folders stay installed. Apply `/squadui` to turn them off for a character, or use the game's AddOns menu. If you already applied the preset, enable any extras you want afterward.
+
+For just one extra, install its Forever release from CurseForge and enable it in AddOns. The squad updater leaves it in place. It updates projects included in your chosen profile.
+
+Better Fishing: equip a fishing pole and bind Cast and Interact under Options > Keybindings > Better Fishing. Press to cast, then press again when the bobber bites. `/bf` opens its options. No fishing key is assigned automatically.
+
+## Updates and saved data
+
+The catalog is [`addons.json`](addons.json). CurseForge downloads use Forever builds only. Squad UI comes from this repository, with its SHA-256 checked before installation. Rerunning the installer updates the sync script; routine syncs fetch the current catalog and addon packages.
+
+The updater writes to `_forever_/Interface/AddOns`. Auction prices, character settings, macros and keybindings live in `_forever_/WTF` and stay there. The in-game UI preset changes only its documented settings after you apply it, and saves an undo snapshot for that character. An addon removed from your selected profile stays installed until you remove it yourself.
+
+Windows checks at login and daily through the WoW Forever addons sync task. Linux uses the `wow-forever-addons.timer` user timer. On Mac, rerun the install command to update. Jeremy's separately configured Mac scheduler continues Tuesday and Friday at 6 p.m. Pacific, catches up after missed runs, and waits for WoW to close.
+
+Mac/Linux updates keep rollback copies of changed folders, preserve the installed Auctionator disenchant patch, and keep a newer ForeverCore when a bundle contains an older copy. Windows checks for the running game before extracting updates. Fully restart WoW after installing new addon folders.
+
+Local files and logs:
+
+- Windows: `%LOCALAPPDATA%\wow-forever-addons\`.
+- Mac/Linux: `~/.local/share/wow-forever-addons/`.
+
+The local `config.json` stores `wow_root` and `profile`. On Mac/Linux, an `exclude_ids` array can skip individual projects, such as `"exclude_ids": [1701034]` for High Fidelity World Map. Preserve the other fields when editing it. Reinstalling preserves these choices.
+
+If something fails, send the last lines of `sync.log` from that folder.
+
+## Remove the updater
+
+```powershell
+$env:WOW_FOREVER_UNINSTALL = '1'
+irm https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/install.ps1 | iex
 ```
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/install.py | python3 - --uninstall
 ```
 
-This removes the task or timer and the script folder. Your addons stay.
+This removes the updater and its timer. Installed addons and WoW settings stay.
 
-## WowUp-CF
+## Maintainer checks
 
-Not needed, since the sync does its job. To install it anyway on Windows, set `$env:WOW_FOREVER_WOWUP = '1'` before the install line.
+Run `python3 -m unittest -v`, `lua5.1 test_squad_ui.lua`, and on Windows `./test_windows.ps1`. CI also downloads and checks every core and optional package. After editing `ui/SquadUI/`, rebuild `SquadUI.zip` with the `SquadUI/` top-level folder and update `ui_bundle.sha256` in `addons.json`. The Python tests check that the zip matches the source exactly.

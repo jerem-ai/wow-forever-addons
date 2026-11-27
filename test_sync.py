@@ -11,6 +11,20 @@ import sync
 
 
 class MacInstallTests(unittest.TestCase):
+    def test_reinstall_preserves_full_profile_and_can_switch_back_to_squad(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            data = pathlib.Path(tmp)
+            config = data / "config.json"
+            config.write_text(json.dumps({"wow_root": "keep", "exclude_ids": [1701034], "profile": "full"}))
+            for argv, expected in [(["install.py"], "full"), (["install.py", "--profile", "squad"], "squad")]:
+                with patch.object(install, "DATA", data), patch.object(install.sys, "argv", argv), \
+                     patch.object(install.urllib.request, "urlopen", return_value=io.BytesIO(b"# sync")), \
+                     patch.object(install.subprocess, "run", return_value=SimpleNamespace(returncode=0)), \
+                     patch.object(install.shutil, "which", return_value=None):
+                    self.assertEqual(install.main(), 0)
+                self.assertEqual(json.loads(config.read_text()),
+                                 {"wow_root": "keep", "exclude_ids": [1701034], "profile": expected})
+
     def test_reinstall_with_wow_root_preserves_local_exclusions(self):
         with tempfile.TemporaryDirectory() as tmp:
             data = pathlib.Path(tmp)
@@ -23,7 +37,7 @@ class MacInstallTests(unittest.TestCase):
                  patch.object(install.shutil, "which", return_value=None):
                 self.assertEqual(install.main(), 0)
             self.assertEqual(json.loads(config.read_text()),
-                             {"wow_root": "/Applications/World of Warcraft", "exclude_ids": [1701034]})
+                             {"wow_root": "/Applications/World of Warcraft", "exclude_ids": [1701034], "profile": "squad"})
 
     def test_finds_native_mac_app_in_path_with_spaces(self):
         with tempfile.TemporaryDirectory() as tmp:

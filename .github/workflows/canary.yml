@@ -6,7 +6,7 @@ on:
   schedule:
     - cron: '17 15 * * *'
   push:
-    paths: ['addons.json', 'sync.py', 'scheduled_mac.py', 'install.py', 'test_sync.py', 'test_scheduled.py', '.github/workflows/canary.yml']
+    paths: ['addons.json', 'SquadUI.zip', 'ui/**', '*.py', '*.ps1', 'test_squad_ui.lua', '.github/workflows/canary.yml']
   workflow_dispatch:
     inputs:
       extra_ids:
@@ -25,6 +25,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check Mac and Linux installer behavior
         run: python3 -m unittest -v
+      - name: Check the UI preset with Lua 5.1
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lua5.1
+          lua5.1 test_squad_ui.lua
       - name: Check every addon
         env:
           EXTRA_IDS: ${{ inputs.extra_ids }}
@@ -35,3 +40,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/canary.yml/enable"
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Windows profile behavior
+        shell: powershell
+        run: ./test_windows.ps1

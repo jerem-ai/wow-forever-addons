@@ -10,7 +10,7 @@ Remove the sync:        $env:WOW_FOREVER_UNINSTALL = '1'; irm ... | iex
 Saves sync.ps1 to %LOCALAPPDATA%\wow-forever-addons\, adds a scheduled task that runs it at logon
 and once a day, then runs the first sync. Installed addons are never removed.
 #>
-function Install-WowForeverAddons([string]$WowRoot, [switch]$WithWowUp, [switch]$Uninstall) {
+function Install-WowForeverAddons([string]$WowRoot, [switch]$WithWowUp, [switch]$Uninstall, [string]$Profile) {
     $ErrorActionPreference = 'Stop'
     $ProgressPreference = 'SilentlyContinue'
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -32,9 +32,17 @@ function Install-WowForeverAddons([string]$WowRoot, [switch]$WithWowUp, [switch]
 
     New-Item -ItemType Directory -Force -Path $data | Out-Null
     Invoke-WebRequest -UseBasicParsing -Uri "$repo/sync.ps1" -OutFile $sync
-    if ($WowRoot) {
-        @{ wow_root = $WowRoot } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $data 'config.json') -Encoding UTF8
+    $configPath = Join-Path $data 'config.json'
+    $config = @{}
+    if (Test-Path -LiteralPath $configPath) {
+        $saved = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
+        foreach ($p in $saved.PSObject.Properties) { $config[$p.Name] = $p.Value }
     }
+    if ($Profile) { $config.profile = $Profile }
+    elseif (-not $config.profile) { $config.profile = 'squad' }
+    if ($config.profile -notin @('squad','full')) { throw 'Profile must be squad or full' }
+    if ($WowRoot) { $config.wow_root = $WowRoot }
+    $config | ConvertTo-Json | Set-Content -LiteralPath $configPath -Encoding UTF8
 
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $sync -FindOnly
     if ($LASTEXITCODE -eq 2) {
@@ -93,8 +101,8 @@ function Install-WowForeverAddons([string]$WowRoot, [switch]$WithWowUp, [switch]
 
     Write-Host 'First sync:'
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $sync
-    $result = @{ 0 = 'all addons installed'; 1 = 'some addons failed, see the lines above'; 2 = 'WoW Forever not found' }[$LASTEXITCODE]
+    $result = @{ 0 = 'all addons installed; restart WoW, then type /squadui for the optional UI preset'; 1 = 'some addons failed, see the lines above'; 2 = 'WoW Forever not found'; 75 = 'WoW is open; quit fully and rerun this command' }[$LASTEXITCODE]
     Write-Host "RESULT: $result (log: $data\sync.log)"
 }
 
-Install-WowForeverAddons -WowRoot $env:WOW_FOREVER_ROOT -WithWowUp:($env:WOW_FOREVER_WOWUP -eq '1') -Uninstall:($env:WOW_FOREVER_UNINSTALL -eq '1')
+Install-WowForeverAddons -WowRoot $env:WOW_FOREVER_ROOT -WithWowUp:($env:WOW_FOREVER_WOWUP -eq '1') -Uninstall:($env:WOW_FOREVER_UNINSTALL -eq '1') -Profile $env:WOW_FOREVER_PROFILE

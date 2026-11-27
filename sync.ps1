@@ -58,17 +58,27 @@ function Get-AddonList {
     try {
         $raw = if (Test-Path -LiteralPath $source) { Get-Content -LiteralPath $source -Raw }
                else { (Invoke-WebRequest -UseBasicParsing -UserAgent $UA -Uri $source).Content }
-        $list = ($raw | ConvertFrom-Json).addons
+        $catalog = $raw | ConvertFrom-Json
         if (Test-Path -LiteralPath $Data) { Set-Content -LiteralPath $cache -Value $raw -Encoding UTF8 }
-        return $list
     } catch {
         $cached = Read-Json $cache
         if ($cached) {
             Say "WARNING addon list unreachable ($($_.Exception.Message)); using the copy from the last sync"
-            return $cached.addons
-        }
-        throw
+            $catalog = $cached
+        } else { throw }
     }
+    $list = @($catalog.addons)
+    if ($script:Profile -eq 'full' -and $catalog.optional_addons) { $list += @($catalog.optional_addons) }
+    if ($catalog.ui_bundle) { $list += $catalog.ui_bundle }
+    return $list
+}
+
+function Resolve-Addon($addon) {
+    if ($addon.bundle) {
+        if ($addon.bundle -ne 'SquadUI' -or $addon.sha256 -cnotmatch '^[0-9a-f]{64}$') { throw 'invalid SquadUI bundle metadata' }
+        return @{ projectId = 'SquadUI'; file = @{ id = $addon.sha256; sha256 = $addon.sha256; displayName = ('Squad UI ' + $addon.version) } }
+    }
+    return @{ projectId = [string]$addon.curseforge_id; file = (Get-ForeverFile $addon.curseforge_id) }
 }
 
 function Get-ForeverFile($projectId) {
@@ -83,8 +93,11 @@ function Get-ForeverFile($projectId) {
 }
 
 function Save-Addon($projectId, $file, [string]$zip) {
+    $url = if ($projectId -eq 'SquadUI') { 'https://raw.githubusercontent.com/jerem-ai/wow-forever-addons/main/SquadUI.zip' }
+           else { "https://www.curseforge.com/api/v1/mods/$projectId/files/$($file.id)/download" }
     Invoke-WebRequest -UseBasicParsing -UserAgent $UA -OutFile $zip `
-        -Uri "https://www.curseforge.com/api/v1/mods/$projectId/files/$($file.id)/download"
+        -Uri $url
+    if ($projectId -eq 'SquadUI' -and (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLower() -cne $file.sha256) { throw 'SquadUI checksum failed' }
     $size = (Get-Item -LiteralPath $zip).Length
     if ($file.fileLength -and $size -ne $file.fileLength) { throw "download is $size bytes, expected $($file.fileLength)" }
     $folders = @{}
@@ -104,6 +117,8 @@ function Save-Addon($projectId, $file, [string]$zip) {
 
 function Invoke-Sync {
     $config = Read-Json (Join-Path $Data 'config.json')
+    $script:Profile = if ($config -and $config.profile) { $config.profile } else { 'squad' }
+    if ($script:Profile -notin @('squad', 'full')) { Say 'FAILED config.json: profile must be squad or full'; return 1 }
     $root = Find-WowRoot $(if ($WowRoot) { $WowRoot } elseif ($config) { $config.wow_root })
     if (-not $root) {
         Say 'WoW Forever not found (no _forever_\Wow.exe). Install it through Battle.net first, or rerun the install with -WowRoot.'
@@ -112,6 +127,7 @@ function Invoke-Sync {
     $addonsDir = Join-Path $root '_forever_\Interface\AddOns'
     Say "WoW Forever: $root"
     if ($FindOnly) { return 0 }
+    if (Get-Process -Name Wow -ErrorAction SilentlyContinue) { Say 'DEFERRED WoW is open; no addon files changed'; return 75 }
 
     New-Item -ItemType Directory -Force -Path $addonsDir | Out-Null
     $statePath = Join-Path $Data 'state.json'
@@ -121,11 +137,13 @@ function Invoke-Sync {
     $tmp = Join-Path $env:TEMP ('wow-forever-addons-' + [guid]::NewGuid())
     New-Item -ItemType Directory -Path $tmp | Out-Null
     $failed = 0
+    $deferred = $false
     try {
         foreach ($a in Get-AddonList) {
-            $pid_ = [string]$a.curseforge_id
             try {
-                $file = Get-ForeverFile $pid_
+                $resolved = Resolve-Addon $a
+                $pid_ = $resolved.projectId
+                $file = $resolved.file
                 if (-not $file) { throw 'no Forever file on CurseForge' }
                 $have = $state[$pid_]
                 if ($have -and $have.file_id -eq $file.id -and
@@ -135,6 +153,7 @@ function Invoke-Sync {
                 }
                 $zip = Join-Path $tmp "$pid_.zip"
                 $folders = Save-Addon $pid_ $file $zip
+                if (Get-Process -Name Wow -ErrorAction SilentlyContinue) { Say 'DEFERRED WoW opened; remaining updates held'; $deferred = $true; break }
                 Expand-Archive -LiteralPath $zip -DestinationPath $addonsDir -Force
                 $state[$pid_] = [pscustomobject]@{ file_id = $file.id; folders = $folders }
                 Say ('{0} {1}: {2}' -f $(if ($have) { 'UPDATED' } else { 'OK     ' }), $a.name, $file.displayName)
@@ -148,10 +167,12 @@ function Invoke-Sync {
     }
     if (Test-Path -LiteralPath $Data) { $state | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $statePath -Encoding UTF8 }
     Say "AddOns folder: $addonsDir"
+    if ($deferred) { return 75 }
     if ($failed) { return 1 }
     return 0
 }
 
+if ($MyInvocation.InvocationName -eq '.') { return }
 $code = Invoke-Sync
 if (Test-Path -LiteralPath $Data) {
     $log = Join-Path $Data 'sync.log'

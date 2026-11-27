@@ -1,41 +1,160 @@
 {
   "addons": [
-    {"name": "Road To Sixty", "curseforge_id": 1729494},
-    {"name": "QuestTogether", "curseforge_id": 296929},
-    {"name": "EasyMarksForever", "curseforge_id": 1723093},
-    {"name": "Lore Forever", "curseforge_id": 1715510},
-    {"name": "GearQuest Forever", "curseforge_id": 1698950},
-    {"name": "DungeonJournal", "curseforge_id": 1707971},
-    {"name": "Forever Quest Tint", "curseforge_id": 1703732},
-    {"name": "What's Training?", "curseforge_id": 324944},
-    {"name": "Threat Plates", "curseforge_id": 21217},
-    {"name": "Auctionator", "curseforge_id": 6124},
-    {"name": "DBM - Deadly Boss Mods", "curseforge_id": 3358},
-    {"name": "DBM - Dungeons", "curseforge_id": 314994},
-    {"name": "X-Perl UnitFrames", "curseforge_id": 1705278},
-    {"name": "Questie", "curseforge_id": 334372},
-    {"name": "QuestieDB", "curseforge_id": 1696795},
-    {"name": "Details! Damage Meter", "curseforge_id": 61284},
-    {"name": "Leatrix Plus", "curseforge_id": 94855},
-    {"name": "Baganator", "curseforge_id": 914482},
-    {"name": "Syndicator", "curseforge_id": 988370},
-    {"name": "Does It Die", "curseforge_id": 1709161},
-    {"name": "SkillUp Forever", "curseforge_id": 1705762},
-    {"name": "Shortest Path Forever", "curseforge_id": 1708599},
-    {"name": "Books on Map Forever", "curseforge_id": 1710228},
-    {"name": "High Fidelity World Map", "curseforge_id": 1701034},
-    {"name": "Lore Forever Quest Dialogue (Male Narrator)", "curseforge_id": 1727331},
-    {"name": "Lore Forever Quest Givers' Voices", "curseforge_id": 1731403},
-    {"name": "OpenMap", "curseforge_id": 1735937},
-    {"name": "Lueur", "curseforge_id": 1732324},
-    {"name": "LootOptimizer Forever", "curseforge_id": 1716046},
-    {"name": "BuffRadar", "curseforge_id": 1742512},
-    {"name": "Chronicle by Purist", "curseforge_id": 1718785},
-    {"name": "Dalorrian's Podium", "curseforge_id": 1717948},
-    {"name": "LevelUpCalculator", "curseforge_id": 1208323},
-    {"name": "savyUI", "curseforge_id": 1722589},
-    {"name": "savyUI Aura Tracker", "curseforge_id": 1796253},
-    {"name": "savyUI Reminders", "curseforge_id": 1796247},
-    {"name": "Better Fishing", "curseforge_id": 709520}
-  ]
+    {
+      "name": "QuestTogether",
+      "curseforge_id": 296929
+    },
+    {
+      "name": "EasyMarksForever",
+      "curseforge_id": 1723093
+    },
+    {
+      "name": "What's Training?",
+      "curseforge_id": 324944
+    },
+    {
+      "name": "Threat Plates",
+      "curseforge_id": 21217
+    },
+    {
+      "name": "Auctionator",
+      "curseforge_id": 6124
+    },
+    {
+      "name": "DBM - Deadly Boss Mods",
+      "curseforge_id": 3358
+    },
+    {
+      "name": "DBM - Dungeons",
+      "curseforge_id": 314994
+    },
+    {
+      "name": "X-Perl UnitFrames",
+      "curseforge_id": 1705278
+    },
+    {
+      "name": "Questie",
+      "curseforge_id": 334372
+    },
+    {
+      "name": "QuestieDB",
+      "curseforge_id": 1696795
+    },
+    {
+      "name": "Leatrix Plus",
+      "curseforge_id": 94855
+    },
+    {
+      "name": "Baganator",
+      "curseforge_id": 914482
+    },
+    {
+      "name": "Syndicator",
+      "curseforge_id": 988370
+    },
+    {
+      "name": "OpenMap",
+      "curseforge_id": 1735937
+    }
+  ],
+  "optional_addons": [
+    {
+      "name": "Road To Sixty",
+      "curseforge_id": 1729494
+    },
+    {
+      "name": "Lore Forever",
+      "curseforge_id": 1715510
+    },
+    {
+      "name": "GearQuest Forever",
+      "curseforge_id": 1698950
+    },
+    {
+      "name": "DungeonJournal",
+      "curseforge_id": 1707971
+    },
+    {
+      "name": "Forever Quest Tint",
+      "curseforge_id": 1703732
+    },
+    {
+      "name": "Details! Damage Meter",
+      "curseforge_id": 61284
+    },
+    {
+      "name": "Does It Die",
+      "curseforge_id": 1709161
+    },
+    {
+      "name": "SkillUp Forever",
+      "curseforge_id": 1705762
+    },
+    {
+      "name": "Shortest Path Forever",
+      "curseforge_id": 1708599
+    },
+    {
+      "name": "Books on Map Forever",
+      "curseforge_id": 1710228
+    },
+    {
+      "name": "High Fidelity World Map",
+      "curseforge_id": 1701034
+    },
+    {
+      "name": "Lore Forever Quest Dialogue (Male Narrator)",
+      "curseforge_id": 1727331
+    },
+    {
+      "name": "Lore Forever Quest Givers' Voices",
+      "curseforge_id": 1731403
+    },
+    {
+      "name": "Lueur",
+      "curseforge_id": 1732324
+    },
+    {
+      "name": "LootOptimizer Forever",
+      "curseforge_id": 1716046
+    },
+    {
+      "name": "BuffRadar",
+      "curseforge_id": 1742512
+    },
+    {
+      "name": "Chronicle by Purist",
+      "curseforge_id": 1718785
+    },
+    {
+      "name": "Dalorrian's Podium",
+      "curseforge_id": 1717948
+    },
+    {
+      "name": "LevelUpCalculator",
+      "curseforge_id": 1208323
+    },
+    {
+      "name": "savyUI",
+      "curseforge_id": 1722589
+    },
+    {
+      "name": "savyUI Aura Tracker",
+      "curseforge_id": 1796253
+    },
+    {
+      "name": "savyUI Reminders",
+      "curseforge_id": 1796247
+    },
+    {
+      "name": "Better Fishing",
+      "curseforge_id": 709520
+    }
+  ],
+  "ui_bundle": {
+    "name": "Squad UI",
+    "bundle": "SquadUI",
+    "version": "1.0.0",
+    "sha256": "2b97f88d09fdf41027562bf9d87ec246d922e5e760e5ea64a0dc33dc0035e03f"
+  }
 }

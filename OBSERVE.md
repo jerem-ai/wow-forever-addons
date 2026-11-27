@@ -1,5 +1,17 @@
 # OBSERVE
 
+## Squad profile and UI preset
+
+- Write sites: both installers preserve the local config and save `profile` (`squad` by default, or `full` by choice). Both syncs install core projects and the checksum-verified `SquadUI.zip`; full also includes `optional_addons`. Removing an item from the selected profile does not delete its folder or saved data.
+- Observe on Mac/Linux:
+  ```sh
+  python3 -c 'import json,pathlib; p=pathlib.Path.home()/".local/share/wow-forever-addons"; print("profile:",json.loads((p/"config.json").read_text()).get("profile","squad")); print("UI:",json.loads((p/"state.json").read_text()).get("SquadUI"))'
+  tail -40 ~/.local/share/wow-forever-addons/sync.log
+  ```
+- Healthy: squad selects 14 CurseForge projects plus Squad UI; full selects 37 plus Squad UI. Squad UI state has folder `SquadUI` and a SHA-256 file ID matching the catalog. A running game produces `DEFERRED` and no addon extraction.
+- In game: `/squadui status` leaves the UI alone. `/squadui` asks before applying. After Apply and Reload, check the buff timers, player/target placement, native quest tracker, Questie map markers, DBM bars, bags and party sharing. Optional extras should be disabled for this character only. `/squadui undo` and Reload should restore the captured settings and addon choices. Appearance fields may be shared through another addon's active profile; test this on a character that uses a shared profile before changing it for the group.
+- The UI writes an undo snapshot to character-local `SquadUIState` and changes only the documented settings after Apply. Auctionator price tables, macros and bindings are outside this write path. Fixture and package checks do not establish the final in-game appearance.
+
 ## Addon sync on a friend's PC
 
 - Write site: `sync.py` `sync()` (Linux) and `sync.ps1` `Invoke-Sync` (Windows), into `<WoW>/_forever_/Interface/AddOns`.
@@ -26,7 +38,7 @@
   ```
 - Healthy: all four sibling folders exist, Syndicator and QuestieDB declare interface `16001` for Forever, and the log reports each dependency installed or current. Quit WoW fully and relaunch after installing new folders, then check that bags open and Questie draws quest markers without a missing dependency warning.
 
-## High Fidelity World Map
+## High Fidelity World Map (optional)
 
 - Write site: the sync installs CurseForge project `1701034` from `addons.json` into `HighFidelityWorldMap` and records its file ID in `state.json`.
 - Observe on Linux:
@@ -67,7 +79,7 @@
   ```
 - Healthy: the launch agent is loaded with a 900-second interval. The ledger records the most recent completed scheduled slot. The logs show `DONE` and sync exit 0, or `DEFERRED` while WoW is open. No network update runs between completed slots. A failed sync leaves the slot pending. Code on disk still needs an in-game check after restarting WoW.
 
-## Lueur, LootOptimizer and BuffRadar
+## Lueur, LootOptimizer and BuffRadar (optional)
 
 - Write site: the existing sync installs projects `1732324`, `1716046` and `1742512` from `addons.json` into `Lueur`, `LOF` and `BuffRadar`, and records their file IDs in `state.json`.
 - Observe on Mac:
@@ -78,7 +90,7 @@
   ```
 - Healthy: each folder declares interface `16001`, has an installed file ID, and reports `OK`, `UPDATED` or `CURRENT`. After fully restarting WoW, verify `/lueur`, `/lof settings` and `/br show`; check a gathering or quest object's glow, controller interaction and the mage's buff list. Review LootOptimizer's proposed discarded item before clicking Swap. File checks do not establish the in-game layout.
 
-## Chronicle, Podium, LevelUpCalculator and savyUI
+## Chronicle, Podium, LevelUpCalculator and savyUI (optional)
 
 - Write site: the existing sync installs projects `1718785`, `1717948`, `1208323`, `1722589`, `1796253` and `1796247` from `addons.json`. Chronicle bundles `Purist` and an old-save migration addon; savyUI's Aura Tracker and Reminders each require the separate `savyUI` folder.
 - Observe on Mac:
@@ -88,7 +100,7 @@
   ```
 - Healthy: all six projects have installed file IDs in `state.json`, all folders exist, and their TOCs include interface `16001`. After fully restarting WoW, verify `/chronicle`, `/podium test`, `/luc` and `/savyui`; check the aura and reminder icons alongside the existing layout. Podium's automatic chat posting should remain off unless you choose to enable it. LevelUpCalculator is currently a beta. Archive and dependency checks do not establish live UI behavior.
 
-## Better Fishing
+## Better Fishing (optional)
 
 - Write site: the existing sync installs CurseForge project `709520` from `addons.json` into `BetterFishing` and records its file ID in `state.json`.
 - Observe on Mac:
